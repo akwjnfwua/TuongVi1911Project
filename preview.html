@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPACE WISH | 19.11</title>
+
+    <!-- Pixel font -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #090d20;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* STAR BACKGROUND */
+        #stars {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .pixel {
+            font-family: 'Press Start 2P', cursive;
+            line-height: 1.8;
+        }
+
+        .subtitle {
+            color: #aaa9e8;
+            font-size: 12px;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: clamp(22px, 5vw, 38px);
+            color: #c8b8ff;
+            text-shadow: 0 0 20px #8672ff;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #c1c3e7;
+            max-width: 480px;
+            line-height: 1.8;
+            margin-bottom: 35px;
+        }
+
+        .planet {
+            font-size: 65px;
+            margin-bottom: 25px;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 18px #7771ff);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        input {
+            width: min(320px, 85vw);
+            padding: 15px;
+            background: #171d3c;
+            border: 2px solid #7168c9;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        input:focus {
+            box-shadow: 0 0 15px #7771ff;
+        }
+
+        button {
+            padding: 14px 22px;
+            background: #7668c9;
+            border: 2px solid #b9aaff;
+            border-radius: 7px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px #8375ff;
+        }
+
+        #result {
+            display: none;
+            max-width: 480px;
+            width: 100%;
+            margin-top: 35px;
+            padding: 28px 20px;
+            background: rgba(35, 39, 82, .85);
+            border: 2px solid #8178db;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(117, 103, 255, .25);
+            animation: reveal .8s ease;
+        }
+
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        #wish {
+            color: #e3dcff;
+            line-height: 1.9;
+            margin: 20px 0;
+            font-size: 17px;
+        }
+
+        .wish-number {
+            color: #aaa9e8;
+            font-size: 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #747ba9;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="stars"></canvas>
+
+<main class="container">
+
+    <p class="subtitle">19 NOVEMBER · 2026</p>
+
+    <div class="planet">🪐</div>
+
+    <h1 class="pixel">SPACE WISH</h1>
+
+    <p class="description">
+        Somewhere in this universe,
+        a little wish is waiting just for you.
+        <br><br>
+        Ready to discover yours?
+    </p>
+
+    <section id="welcome">
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter your name..."
+            maxlength="40"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            START YOUR JOURNEY ✦
+        </button>
+    </section>
+
+    <section id="result">
+        <p class="pixel" style="font-size:13px">
+            HELLO, <span id="playerName"></span>!
+        </p>
+
+        <p style="margin-top:15px;color:#aaa9e8">
+            A message from the universe ✨
+        </p>
+
+        <p id="wish"></p>
+
+        <p class="wish-number" id="wishNumber"></p>
+
+        <br>
+
+        <button onclick="anotherWish()">
+            ANOTHER WISH ↻
+        </button>
+    </section>
+
+    <p class="footer">
+        MADE WITH ♡ FOR INTERNATIONAL MEN'S DAY
+    </p>
+
+</main>
+
+<script>
+    // WISH DATABASE
+    const wishes = [
+        "Chúc cậu luôn vui vẻ và gặp nhiều may mắn!",
+        "Mong mọi ước mơ của cậu đều trở thành hiện thực.",
+        "Chúc cậu luôn tự tin và tỏa sáng theo cách riêng.",
+        "Mong cậu có thật nhiều niềm vui trong cuộc sống.",
+        "Chúc cậu học tập thật tốt và đạt được mục tiêu!",
+        "Hy vọng vũ trụ luôn gửi đến cậu những điều tốt đẹp.",
+        "Chúc cậu luôn giữ được sự tò mò và nhiệt huyết.",
+        "Mong mỗi ngày của cậu đều có một lý do để mỉm cười.",
+        "Chúc cậu có thật nhiều trải nghiệm đáng nhớ.",
+        "Mong những nỗ lực của cậu luôn được đền đáp.",
+        "Chúc cậu luôn mạnh mẽ trước mọi thử thách.",
+        "Hy vọng cậu sẽ gặp được những người bạn tuyệt vời.",
+        "Chúc cậu có một năm thật rực rỡ!",
+        "Mong cậu luôn tìm thấy niềm vui trong những điều nhỏ bé.",
+        "Chúc cậu luôn là phiên bản tốt nhất của chính mình.",
+        "Mong hành trình phía trước của cậu đầy những bất ngờ thú vị.",
+        "Chúc cậu luôn khỏe mạnh và bình an.",
+        "Hy vọng mọi dự định của cậu đều thuận lợi.",
+        "Chúc cậu luôn có đủ dũng khí để theo đuổi điều mình thích.",
+        "Vũ trụ hôm nay gửi đến cậu một lời chúc thật đặc biệt. Happy Men's Day!"
+    ];
+
+    let currentName = "";
+
+    function startGame() {
+        const input = document.getElementById("username");
+        const name = input.value.trim();
+
+        if (!name) {
+            alert("Hey astronaut! Enter your name first ✦");
+            return;
+        }
+
+        currentName = name;
+
+        document.getElementById("welcome").classList.add("hidden");
+        document.getElementById("result").style.display = "block";
+        document.getElementById("playerName").textContent = name;
+
+        anotherWish();
+    }
+
+    function anotherWish() {
+        const index = Math.floor(Math.random() * wishes.length);
+
+        document.getElementById("wish").textContent =
+            `Chúc ${currentName} ${wishes[index]}`;
+
+        document.getElementById("wishNumber").textContent =
+            `TRANSMISSION #${index + 1}`;
+
+        const result = document.getElementById("result");
+
+        result.style.animation = "none";
+        void result.offsetWidth;
+        result.style.animation = "reveal .8s ease";
+    }
+
+    // STAR PARTICLES
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d");
+
+    let stars = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        stars = Array.from({ length: 150 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.8 + 0.3,
+            opacity: Math.random(),
+            speed: Math.random() * 0.015 + 0.003
+        }));
+    }
+
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        stars.forEach(star => {
+            star.opacity += star.speed;
+
+            if (star.opacity >= 1 || star.opacity <= 0.15) {
+                star.speed *= -1;
+            }
+
+            ctx.fillStyle = `rgba(210, 205, 255, ${star.opacity})`;
+            ctx.fillRect(star.x, star.y, star.size, star.size);
+        });
+
+        requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+    animateStars();
+
+</script>
+
+</body>
+</html>
