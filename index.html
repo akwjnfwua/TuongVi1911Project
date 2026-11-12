@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ 19/11 Generator - Chúc Mừng Ngày Quốc Tế Nam Giới</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fira Code & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        ide: {
+                            bg: '#1e1e2e',
+                            sidebar: '#181825',
+                            editor: '#1e1e2e',
+                            line: '#313244',
+                            active: '#45475a',
+                            terminal: '#11111b',
+                            text: '#cdd6f4',
+                            comment: '#6c7086',
+                            keyword: '#cba6f7',
+                            string: '#a6e3a1',
+                            function: '#89b4fa',
+                            variable: '#f9e2af',
+                            accent: '#fab387',
+                            accentGreen: '#a6e3a1'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for IDE look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #181825;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #45475a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #585b70;
+        }
+        
+        .code-line::before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            width: 2rem;
+            margin-right: 1.5rem;
+            color: #585b70;
+            text-align: right;
+            user-select: none;
+        }
+
+        .code-container {
+            counter-reset: line;
+        }
+
+        /* Pulse glow for run button */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(166, 227, 161, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(166, 227, 161, 0.8); }
+        }
+        .btn-run-glow {
+            animation: pulseGlow 2s infinite;
+        }
+
+        /* Terminal typing blinking cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 1.1em;
+            background-color: #a6e3a1;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-[#11111b] text-ide-text font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-[#585b70] selection:text-[#cdd6f4]">
+
+    <!-- IDE TOP NAVBAR -->
+    <header class="bg-[#181825] border-b border-[#313244] px-4 py-2 flex items-center justify-between text-xs select-none">
+        <div class="flex items-center space-x-3">
+            <div class="flex space-x-1.5">
+                <span class="w-3 h-3 rounded-full bg-[#f38ba8] inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-[#f9e2af] inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-[#a6e3a1] inline-block"></span>
+            </div>
+            <span class="text-gray-400 font-mono ml-2 hidden sm:inline"><i class="fa-solid fa-[#c++] text-blue-400 mr-1"></i> Dev-CPP / VS Code - 1911_wishes.cpp</span>
+        </div>
+        
+        <div class="flex items-center space-x-2 font-mono text-gray-300">
+            <span class="px-2 py-0.5 rounded bg-[#313244] text-[11px] text-green-400"><i class="fa-solid fa-code-commit mr-1"></i> C++20 standard</span>
+            <button id="soundToggleBtn" onclick="toggleSound()" class="px-2 py-1 rounded hover:bg-[#313244] text-gray-400 hover:text-white transition" title="Bật/Tắt âm thanh">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </button>
+            <button onclick="openGithubModal()" class="px-2 py-1 rounded bg-[#313244] hover:bg-[#45475a] text-purple-300 transition text-xs flex items-center gap-1">
+                <i class="fa-brands fa-github"></i> <span>Tạo Web GitHub</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN IDE WORKSPACE -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- SIDEBAR (FILE EXPLORER) - Hidden on mobile, visible on desktop -->
+        <aside class="w-64 bg-[#181825] border-r border-[#313244] flex-col hidden md:flex select-none">
+            <div class="px-3 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
+                <span>Explorer</span>
+                <i class="fa-solid fa-ellipsis"></i>
+            </div>
+            
+            <div class="font-mono text-xs">
+                <div class="px-3 py-1 text-gray-400 flex items-center gap-1.5 font-bold">
+                    <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    <i class="fa-regular fa-folder-open text-yellow-400"></i>
+                    <span>MEN_DAY_1911</span>
+                </div>
+                
+                <div class="pl-6 py-1 pr-3 bg-[#313244]/50 border-l-2 border-[#cba6f7] text-white flex items-center justify-between cursor-pointer">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-file-code text-blue-400"></i>
+                        main.cpp
+                    </span>
+                    <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1 rounded">C++</span>
+                </div>
+
+                <div class="pl-6 py-1 pr-3 text-gray-400 hover:text-gray-200 cursor-pointer flex items-center gap-2" onclick="openWishesModal()">
+                    <i class="fa-solid fa-database text-yellow-400"></i>
+                    wishes_db.h
+                </div>
+
+                <div class="pl-6 py-1 pr-3 text-gray-400 hover:text-gray-200 cursor-pointer flex items-center gap-2" onclick="openGithubModal()">
+                    <i class="fa-solid fa-book text-emerald-400"></i>
+                    README.md
+                </div>
+            </div>
+
+            <!-- IDE Information Box -->
+            <div class="mt-auto p-3 m-2 rounded bg-[#11111b] border border-[#313244] text-xs font-mono space-y-2">
+                <div class="text-purple-400 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-mars"></i> 19/11 Men's Day
+                </div>
+                <p class="text-gray-400 text-[11px] leading-relaxed">
+                    Chúc tất cả các bạn nam luôn tràn đầy năng lượng, logic vững vàng, code sạch không bug!
+                </p>
+                <div class="text-[10px] text-gray-500 pt-1 border-t border-[#313244]">
+                    Compiler: GCC 13.2.0 x86_64
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER EDITING AREA & TERMINAL -->
+        <section class="flex-1 flex flex-col bg-ide-bg overflow-y-auto">
+            
+            <!-- EDITOR TAB HEADER -->
+            <div class="bg-[#181825] border-b border-[#313244] flex items-center overflow-x-auto text-xs font-mono">
+                <div class="px-4 py-2 bg-[#1e1e2e] text-white border-t-2 border-[#cba6f7] border-r border-[#313244] flex items-center gap-2 font-medium">
+                    <i class="fa-solid fa-file-code text-blue-400"></i>
+                    <span>main.cpp</span>
+                    <span class="text-gray-500 hover:text-gray-300 cursor-pointer ml-2">×</span>
+                </div>
+                <div class="px-4 py-2 text-gray-400 hover:bg-[#262637] cursor-pointer flex items-center gap-2" onclick="openWishesModal()">
+                    <i class="fa-solid fa-database text-yellow-500"></i>
+                    <span>wishes_db.h</span>
+                </div>
+            </div>
+
+            <!-- CODE EDITOR PANEL -->
+            <div class="p-4 font-mono text-sm leading-relaxed overflow-x-auto bg-[#1e1e2e] text-ide-text code-container flex-1 min-h-[320px]">
+                
+                <div class="code-line"><span class="text-ide-comment">// Program: 1911_MensDay_Wish_Generator.cpp</span></div>
+                <div class="code-line"><span class="text-ide-comment">// Dev: IT / Math-CS Male Appreciation Engine</span></div>
+                <div class="code-line"><span class="text-ide-keyword">#include</span> <span class="text-ide-string">&lt;iostream&gt;</span></div>
+                <div class="code-line"><span class="text-ide-keyword">#include</span> <span class="text-ide-string">&lt;string&gt;</span></div>
+                <div class="code-line"><span class="text-ide-keyword">#include</span> <span class="text-ide-string">&lt;vector&gt;</span></div>
+                <div class="code-line"><span class="text-ide-keyword">#include</span> <span class="text-ide-string">&lt;random&gt;</span></div>
+                <div class="code-line"></div>
+                <div class="code-line"><span class="text-ide-keyword">using namespace</span> <span class="text-ide-variable">std</span>;</div>
+                <div class="code-line"></div>
+                <div class="code-line"><span class="text-ide-keyword">int</span> <span class="text-ide-function">main</span>() {</div>
+                <div class="code-line pl-4"><span class="text-ide-variable">string</span> name;</div>
+                <div class="code-line pl-4"><span class="text-ide-function">cout</span> &lt;&lt; <span class="text-ide-string">"Nhap ten cua ban vao day :33 "</span>;</div>
+                
+                <!-- Dynamic display inside code editor -->
+                <div class="code-line pl-4 bg-[#313244]/40 my-1 py-0.5 rounded border-l-2 border-green-400">
+                    <span class="text-ide-comment">// Input buffer current state:</span>
+                    <span class="text-yellow-300 font-bold ml-2" id="codeEditorNameBuffer">name = ""</span>
+                </div>
+                
+                <div class="code-line pl-4"><span class="text-ide-function">getline</span>(<span class="text-ide-function">cin</span>, name);</div>
+                <div class="code-line"></div>
+                <div class="code-line pl-4"><span class="text-ide-comment">// Randomly select 1 wish out of 18 funny & meaningful quotes</span></div>
+                <div class="code-line pl-4"><span class="text-ide-variable">WishGenerator</span> engine;</div>
+                <div class="code-line pl-4"><span class="text-ide-variable">string</span> loichuc = engine.<span class="text-ide-function">getRandomWishForMale</span>(name);</div>
+                <div class="code-line"></div>
+                <div class="code-line pl-4"><span class="text-ide-function">cout</span> &lt;&lt; <span class="text-ide-string">"\n=== [ RESULT ] ==="</span> &lt;&lt; <span class="text-ide-function">endl</span>;</div>
+                <div class="code-line pl-4"><span class="text-ide-function">cout</span> &lt;&lt; loichuc &lt;&lt; <span class="text-ide-function">endl</span>;</div>
+                <div class="code-line pl-4"><span class="text-ide-keyword">return</span> <span class="text-amber-300">0</span>;</div>
+                <div class="code-line">}</div>
+
+            </div>
+
+            <!-- INTERACTIVE INPUT CONTROL BAR -->
+            <div class="bg-[#181825] border-t border-[#313244] p-4 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 font-mono text-sm">
+                        <i class="fa-solid fa-terminal text-green-400"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="userNameInput" 
+                        placeholder="Nhập tên của bạn vào đây :33 (vd: Tuấn, Hoàng, Minh...)" 
+                        class="w-full bg-[#11111b] border border-[#45475a] focus:border-[#a6e3a1] rounded-lg pl-9 pr-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:ring-1 focus:ring-[#a6e3a1] transition placeholder-gray-500"
+                        onkeyup="syncNameBuffer(this.value); if(event.key==='Enter') runCompiler();"
+                    >
+                </div>
+                
+                <button 
+                    id="runBtn" 
+                    onclick="runCompiler()" 
+                    class="bg-[#a6e3a1] hover:bg-[#94e2d5] text-[#11111b] font-mono font-bold px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-lg transition active:scale-95 btn-run-glow cursor-pointer whitespace-nowrap"
+                >
+                    <i class="fa-solid fa-play"></i>
+                    <span>Biên dịch & Chạy (Run Code)</span>
+                    <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded ml-1 font-semibold">F5</span>
+                </button>
+            </div>
+
+            <!-- TERMINAL OUTPUT CONTAINER -->
+            <div id="terminalContainer" class="bg-[#11111b] border-t border-[#313244] p-4 font-mono text-xs md:text-sm min-h-[220px] flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#313244] text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-square-terminal text-green-400"></i>
+                            <span class="font-bold text-gray-200">Terminal Output</span>
+                            <span id="statusBadge" class="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded font-mono">Ready</span>
+                        </div>
+                        <div class="text-[11px] text-gray-500">
+                            bash - 80x24
+                        </div>
+                    </div>
+
+                    <!-- REALTIME CONSOLE OUTPUT TEXT -->
+                    <div id="terminalOutput" class="space-y-1 leading-relaxed text-gray-300">
+                        <p class="text-gray-500">// Nhập tên phía trên và bấm "Biên dịch & Chạy" để khởi chạy chương trình chúc mừng 19/11...</p>
+                    </div>
+                </div>
+
+                <!-- RESULT WISH CARD DISPLAY (POPULATED AFTER RUN) -->
+                <div id="wishCard" class="hidden mt-4 p-5 rounded-xl bg-gradient-to-r from-[#181825] to-[#262637] border-2 border-[#cba6f7] shadow-2xl relative overflow-hidden transform transition duration-500 scale-95 opacity-0">
+                    <div class="absolute -right-6 -bottom-6 text-7xl text-purple-500/10 pointer-events-none">
+                        <i class="fa-solid fa-mars"></i>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs font-bold text-[#cba6f7] uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Lời Chúc Dành Riêng Cho Bạn
+                    </div>
+
+                    <div id="wishTextDisplay" class="text-base md:text-lg font-sans font-semibold text-white leading-relaxed mb-4">
+                        <!-- Dynamic content inserted here -->
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-[#313244]">
+                        <button onclick="runCompiler()" class="bg-[#313244] hover:bg-[#45475a] text-white text-xs px-3 py-2 rounded-md font-mono flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-rotate-right text-yellow-400"></i> Quay lời chúc khác
+                        </button>
+
+                        <button onclick="copyWishToClipboard()" class="bg-[#313244] hover:bg-[#45475a] text-white text-xs px-3 py-2 rounded-md font-mono flex items-center gap-1.5 transition">
+                            <i class="fa-regular fa-copy text-blue-400"></i> Copy Lời Chúc
+                        </button>
+
+                        <button onclick="shareLink()" class="bg-[#313244] hover:bg-[#45475a] text-white text-xs px-3 py-2 rounded-md font-mono flex items-center gap-1.5 transition ml-auto">
+                            <i class="fa-solid fa-share-nodes text-green-400"></i> Chia sẻ trang web
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- STATUS BAR AT BOTTOM -->
+    <footer class="bg-[#181825] border-t border-[#313244] px-4 py-1 flex items-center justify-between text-[11px] font-mono text-gray-400 select-none">
+        <div class="flex items-center space-x-4">
+            <span class="bg-[#313244] px-1.5 py-0.5 rounded text-white"><i class="fa-solid fa-[#c++] text-blue-400"></i> Main.cpp</span>
+            <span class="hidden sm:inline"><i class="fa-solid fa-check text-green-400"></i> 0 Errors, 0 Warnings</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-purple-300 font-semibold"><i class="fa-solid fa-heart text-red-400"></i> Happy Men's Day 19/11</span>
+            <span class="hidden md:inline">UTF-8</span>
+            <span class="hidden md:inline">Ln 24, Col 1</span>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: KHO LỜI CHÚC (WISHES DATABASE) -->
+    <div id="wishesModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#181825] border border-[#45475a] w-full max-w-2xl rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-[#313244] flex items-center justify-between">
+                <h3 class="font-mono text-sm font-bold text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-database"></i> Database: wishes_db.h (18 Lời Chúc 19/11)
+                </h3>
+                <button onclick="closeWishesModal()" class="text-gray-400 hover:text-white text-lg">×</button>
+            </div>
+            <div class="p-4 overflow-y-auto space-y-3 font-sans text-sm flex-1" id="wishesListContainer">
+                <!-- Wishes will be injected via JS -->
+            </div>
+            <div class="p-3 border-t border-[#313244] text-right">
+                <button onclick="closeWishesModal()" class="bg-[#313244] hover:bg-[#45475a] text-white font-mono text-xs px-4 py-2 rounded-lg">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: GITHUB PAGES GUIDE -->
+    <div id="githubModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#181825] border border-[#45475a] w-full max-w-2xl rounded-xl shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-[#313244] flex items-center justify-between">
+                <h3 class="font-mono text-sm font-bold text-emerald-400 flex items-center gap-2">
+                    <i class="fa-brands fa-github"></i> Hướng Dẫn Up Web Lên GitHub Pages Miễn Phí
+                </h3>
+                <button onclick="closeGithubModal()" class="text-gray-400 hover:text-white text-lg">×</button>
+            </div>
+            <div class="p-5 overflow-y-auto font-sans text-sm space-y-4 text-gray-300">
+                <p>Để xuất bản file HTML này thành một đường link web thực tế (ví dụ: <code class="text-green-300">yourname.github.io/mensday</code>) cho các bạn nam truy cập, hãy làm 4 bước đơn giản:</p>
+                
+                <ol class="list-decimal list-inside space-y-3 font-mono text-xs bg-[#11111b] p-4 rounded-lg border border-[#313244]">
+                    <li><strong class="text-white">Tạo Repository mới trên GitHub:</strong> Đăng nhập github.com &rarr; Nhấn <b>New Repository</b> &rarr; Đặt tên (ví dụ: <code>mensday-1911</code>).</li>
+                    <li><strong class="text-white">Lưu file HTML:</strong> Đổi tên file code này thành <code class="text-yellow-300">index.html</code>.</li>
+                    <li><strong class="text-white">Upload file lên GitHub:</strong> Trong Repository vừa tạo, chọn <b>Add file</b> &rarr; <b>Upload files</b> &rarr; Kéo thả file <code>index.html</code> vào &rarr; Nhấn <b>Commit changes</b>.</li>
+                    <li><strong class="text-white">Bật GitHub Pages:</strong> Vào <b>Settings</b> của repository &rarr; Chọn menu <b>Pages</b> (ở cột bên trái) &rarr; Tại mục <i>Branch</i> chọn <code>main</code> (hoặc <code>master</code>) &rarr; Nhấn <b>Save</b>.</li>
+                </ol>
+
+                <div class="p-3 bg-purple-900/30 border border-purple-500/30 rounded-lg text-xs text-purple-200">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Sau khoảng 1-2 phút, GitHub sẽ cấp cho bạn một đường link công khai để chia sẻ cho cả lớp hoặc hội bạn thân!
+                </div>
+            </div>
+            <div class="p-3 border-t border-[#313244] text-right">
+                <button onclick="closeGithubModal()" class="bg-[#313244] hover:bg-[#45475a] text-white font-mono text-xs px-4 py-2 rounded-lg">Đã hiểu!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-10 right-5 bg-emerald-600 text-white font-mono text-xs px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition duration-300 z-50">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">Đã sao chép vào bộ nhớ tạm!</span>
+    </div>
+
+    <script>
+        // ------------------------------------------------------------------
+        // WISHES DATABASE (18 FUNNY & MEANINGFUL TECH/C++ MEN'S DAY WISHES)
+        // ------------------------------------------------------------------
+        const WISHES_DATABASE = [
+            "Chúc {NAME} code luôn trơn tru không bug, deploy không crash, crush gật đầu tắp lự mà không cần try-catch exception!",
+            "Chúc {NAME} ngày 19/11 có RAM luôn kiên trì, CPU không bao giờ quá nhiệt, độ đẹp trai tăng exponentially theo thời gian!",
+            "Chúc {NAME} luôn tìm thấy điểm `return 0` bình yên sau những vòng lặp infinite loop mệt mỏi của giải thuật cuộc sống!",
+            "Chúc {NAME} ngày 19/11 có `int happiness = INT_MAX`, `double stress = 0.0`, thi môn nào qua môn đó, đồ án A+ mượt mà!",
+            "Chúc nam thần {NAME} logic chuẩn chỉ như thuật toán Dijkstra, tìm ra đường đi ngắn nhất tới thành công và trái tim người ấy!",
+            "Chúc {NAME} ngày 19/11 tài chính dồi dào như bộ nhớ Dynamic Allocation, sức khỏe bền vững kiên cố như `const reference` trong C++!",
+            "Chúc {NAME} luôn là cao thủ 'debug' mọi rắc rối trong đời, có vô số 'pointers' trỏ chính xác tới niềm vui và hạnh phúc!",
+            "Chúc {NAME} ngày 19/11 không bao giờ bị 'Memory Leak' kỷ niệm đẹp, tình bạn tình anh em vững chắc như kết cấu B-Tree!",
+            "Chúc {NAME} có 'Compiler' cuộc đời luôn biên dịch ra những điều may mắn, bypass qua mọi khó khăn thử thách!",
+            "Chúc {NAME} ngày 19/11 luôn giữ vững phong độ đẹp trai, code đỉnh, toán giỏi, luôn là chỗ dựa uy tín cho các chị em!",
+            "Chúc {NAME} có dung lượng năng lượng 100%, không bao giờ gặp lỗi 'Stack Overflow' vì deadline, 19/11 quẩy hết mình!",
+            "Chúc {NAME} ngày 19/11 luôn giữ tinh thần `while(alive) { keep_learning(); stay_awesome(); }`!",
+            "Chúc {NAME} xử lý mượt mà mọi thuật toán cuộc đời, tối ưu hóa thời gian học tập, rảnh rỗi là có tiền tiêu và có chỗ đi chơi!",
+            "Chúc {NAME} luôn sở hữu chỉ số 'Charisma' cực cao, gõ phím như thần, giải đề toán tin siêu tốc, 19/11 nhận vô vàn quà!",
+            "Chúc {NAME} ngày 19/11 luôn giữ trái tim ấm áp, cái đầu lạnh chuẩn logic, và một ví tiền đầy dung lượng 1TB!",
+            "Chúc {NAME} tránh xa mọi rủi ro 'Null Pointer Exception', đi đâu cũng gặp quý nhân, làm gì cũng gặt hái thành công lớn!",
+            "Chúc {NAME} 19/11 nhận được vô số lời chúc ngọt ngào, tối đến code mượt tay, game thắng chuỗi, đời vui phơi phới!",
+            "Chúc {NAME} luôn là phiên bản `v2.0` hoàn hảo hơn mỗi ngày: Đẹp trai hơn, Giỏi giang hơn, và Luôn hạnh phúc!"
+        ];
+
+        // Web Audio API Sound FX generator (No external sound files required)
+        let soundEnabled = true;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { console.log(e); }
+        }
+
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            setTimeout(() => playBeep(523.25, 'triangle', 0.12), 0);
+            setTimeout(() => playBeep(659.25, 'triangle', 0.12), 100);
+            setTimeout(() => playBeep(783.99, 'triangle', 0.15), 200);
+            setTimeout(() => playBeep(1046.50, 'triangle', 0.3), 300);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-[#a6e3a1]';
+                showToast('Đã bật âm thanh hiệu ứng!');
+                playBeep(600, 'sine', 0.1);
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-gray-500';
+                showToast('Đã tắt âm thanh.');
+            }
+        }
+
+        // Live update input in code editor preview
+        function syncNameBuffer(val) {
+            const buffer = document.getElementById('codeEditorNameBuffer');
+            if (val.trim() === '') {
+                buffer.textContent = 'name = ""';
+                buffer.className = 'text-yellow-300 font-bold ml-2';
+            } else {
+                buffer.textContent = `name = "${val.replace(/"/g, '\\"')}"`;
+                buffer.className = 'text-green-300 font-bold ml-2';
+            }
+        }
+
+        // Trigger compilation and wish generation
+        let isCompiling = false;
+
+        function runCompiler() {
+            if (isCompiling) return;
+            
+            const nameInput = document.getElementById('userNameInput');
+            let rawName = nameInput.value.trim();
+            if (!rawName) {
+                rawName = "Bạn Nam Đẹp Trai";
+            }
+
+            isCompiling = true;
+            playBeep(800, 'square', 0.08);
+
+            const btn = document.getElementById('runBtn');
+            const statusBadge = document.getElementById('statusBadge');
+            const terminalOutput = document.getElementById('terminalOutput');
+            const wishCard = document.getElementById('wishCard');
+
+            // Reset state
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>g++ Compiling...</span>`;
+            statusBadge.className = "text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded font-mono";
+            statusBadge.textContent = "Compiling & Linking...";
+
+            wishCard.classList.add('hidden', 'scale-95', 'opacity-0');
+
+            // Simulated step-by-step C++ Terminal output
+            terminalOutput.innerHTML = `
+                <div class="text-blue-400">$ g++ -std=c++20 -O3 main.cpp -o loichuc_1911</div>
+                <div class="text-gray-400">[1/3] Parsing syntax tree & headers...</div>
+            `;
+
+            setTimeout(() => {
+                playBeep(600, 'square', 0.05);
+                terminalOutput.innerHTML += `<div class="text-gray-400">[2/3] Linking STL libraries & random_device engine... <span class="text-green-400">[OK]</span></div>`;
+            }, 300);
+
+            setTimeout(() => {
+                playBeep(700, 'square', 0.05);
+                terminalOutput.innerHTML += `<div class="text-gray-400">[3/3] Executing binary ./loichuc_1911...</div>`;
+            }, 600);
+
+            setTimeout(() => {
+                // Select Random Wish
+                const randomIndex = Math.floor(Math.random() * WISHES_DATABASE.length);
+                const wishTemplate = WISHES_DATABASE[randomIndex];
+                const finalWish = wishTemplate.replace(/{NAME}/g, `<span class="text-yellow-300 font-bold underline decoration-wavy decoration-purple-400">${escapeHtml(rawName)}</span>`);
+
+                // Terminal finished logs
+                terminalOutput.innerHTML += `
+                    <div class="text-emerald-400 font-bold pt-1">
+                        <i class="fa-solid fa-check"></i> Process exited with code 0 (0x0) after 0.42s
+                    </div>
+                `;
+
+                // Render Wish Card
+                document.getElementById('wishTextDisplay').innerHTML = `"${finalWish}"`;
+                
+                wishCard.classList.remove('hidden');
+                setTimeout(() => {
+                    wishCard.classList.remove('scale-95', 'opacity-0');
+                    wishCard.classList.add('scale-100', 'opacity-100');
+                }, 50);
+
+                // Confetti animation
+                triggerConfetti();
+
+                // Sound effect
+                playSuccessSound();
+
+                // Reset button
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btn.innerHTML = `<i class="fa-solid fa-play"></i> <span>Biên dịch & Chạy (Run Code)</span> <span class="text-[10px] bg-black/20 px-1.5 py-0.5 rounded ml-1 font-semibold">F5</span>`;
+                
+                statusBadge.className = "text-[10px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded font-mono";
+                statusBadge.textContent = "Execution Successful";
+
+                isCompiling = false;
+
+                // Auto scroll to wish card if on mobile
+                wishCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            }, 900);
+        }
+
+        // Helper to escape HTML characters
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Confetti burst
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.7 },
+                    colors: ['#cba6f7', '#89b4fa', '#a6e3a1', '#f9e2af', '#f38ba8']
+                });
+            }
+        }
+
+        // Copy wish content
+        function copyWishToClipboard() {
+            const wishElement = document.getElementById('wishTextDisplay');
+            const cleanText = wishElement.innerText || wishElement.textContent;
+            
+            // Clipboard fallback logic for iframe/secure context compatibility
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = cleanText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Đã sao chép lời chúc vào khay nhớ tạm!');
+                playBeep(900, 'sine', 0.1);
+            } catch (err) {
+                showToast('Không thể sao chép tự động!');
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        // Share Link function
+        function shareLink() {
+            const dummyUrl = window.location.href;
+            const tempInput = document.createElement('input');
+            tempInput.value = dummyUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Đã sao chép đường dẫn trang web!');
+            playBeep(850, 'sine', 0.08);
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Render Database Modal Content
+        function openWishesModal() {
+            const container = document.getElementById('wishesListContainer');
+            container.innerHTML = '';
+            
+            WISHES_DATABASE.forEach((item, index) => {
+                const sampleWish = item.replace(/{NAME}/g, 'Nam');
+                const card = document.createElement('div');
+                card.className = "p-3 bg-[#11111b] border border-[#313244] rounded-lg text-xs font-mono text-gray-300 leading-relaxed hover:border-purple-400 transition";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-yellow-400 font-bold mb-1">
+                        <span>// Wish #${index + 1}</span>
+                        <i class="fa-solid fa-quote-right text-gray-600"></i>
+                    </div>
+                    <p class="font-sans text-sm text-gray-200">${sampleWish}</p>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('wishesModal').classList.remove('hidden');
+        }
+
+        function closeWishesModal() {
+            document.getElementById('wishesModal').classList.add('hidden');
+        }
+
+        // GitHub Modal
+        function openGithubModal() {
+            document.getElementById('githubModal').classList.remove('hidden');
+        }
+
+        function closeGithubModal() {
+            document.getElementById('githubModal').classList.add('hidden');
+        }
+
+        // Keyboard Shortcut F5 to Run
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                runCompiler();
+            }
+        });
+
+        // Initial setup on load
+        window.onload = function() {
+            syncNameBuffer('');
+        }
+    </script>
+</body>
+</html>
