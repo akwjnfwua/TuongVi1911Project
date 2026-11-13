@@ -197,14 +197,13 @@
     </section>
 
     <section id="result">
-        <p class="pixel" style="font-size:13px">
-            HELLO, <span id="playerName"></span>!
-        </p>
+      <p class="pixel" style="font-size:16px">
+    Xin chào, <span id="playerName"></span>!
+</p>
 
-        <p style="margin-top:15px;color:#aaa9e8">
-            Một món quà nhỏ của chúng tớ ✨
-        </p>
-
+<p id="senderMessage"
+   style="margin-top:15px;color:#aaa9e8">
+</p>
         <p id="wish"></p>
 
         <p class="wish-number" id="wishNumber"></p>
@@ -224,29 +223,28 @@
 
 <script>
     // WISH DATABASE
-    const wishes = [
-        "Chúc cậu luôn vui vẻ và gặp nhiều may mắn!",
-        "Mong mọi ước mơ của cậu đều trở thành hiện thực.",
-        "Chúc cậu luôn tự tin và tỏa sáng theo cách riêng.",
-        "Mong cậu có thật nhiều niềm vui trong cuộc sống.",
-        "Chúc cậu học tập thật tốt và đạt được mục tiêu!",
-        "Hy vọng vũ trụ luôn gửi đến cậu những điều tốt đẹp.",
-        "Chúc cậu luôn giữ được sự tò mò và nhiệt huyết.",
-        "Mong mỗi ngày của cậu đều có một lý do để mỉm cười.",
-        "Chúc cậu có thật nhiều trải nghiệm đáng nhớ.",
-        "Mong những nỗ lực của cậu luôn được đền đáp.",
-        "Chúc cậu luôn mạnh mẽ trước mọi thử thách.",
-        "Hy vọng cậu sẽ gặp được những người bạn tuyệt vời.",
-        "Chúc cậu có một năm thật rực rỡ!",
-        "Mong cậu luôn tìm thấy niềm vui trong những điều nhỏ bé.",
-        "Chúc cậu luôn là phiên bản tốt nhất của chính mình.",
-        "Mong hành trình phía trước của cậu đầy những bất ngờ thú vị.",
-        "Chúc cậu luôn khỏe mạnh và bình an.",
-        "Hy vọng mọi dự định của cậu đều thuận lợi.",
-        "Chúc cậu luôn có đủ dũng khí để theo đuổi điều mình thích.",
-        "Vũ trụ hôm nay gửi đến cậu một lời chúc thật đặc biệt. Happy Men's Day!"
-    ];
-
+   const wishes = [
+    {
+        text: "Chúc cậu luôn mạnh mẽ trước mọi thử thách!",
+        from: "Bạn A"
+    },
+    {
+        text: "Mong mọi ước mơ của cậu đều trở thành hiện thực.",
+        from: "Bạn B"
+    },
+    {
+        text: "Chúc cậu học tập thật tốt và đạt được mục tiêu!",
+        from: "Bạn C"
+    },
+    {
+        text: "Mong cậu luôn vui vẻ và gặp nhiều may mắn!",
+        from: "Bạn D"
+    },
+    {
+        text: "Chúc cậu code không bug, thi không tạch!",
+        from: "Bạn E"
+    }
+];
     let currentName = "";
 
     function startGame() {
@@ -268,20 +266,32 @@
     }
 
     function anotherWish() {
-        const index = Math.floor(Math.random() * wishes.length);
+    const index = Math.floor(Math.random() * wishes.length);
 
-        document.getElementById("wish").textContent =
-            `Chúc ${currentName} ${wishes[index]}`;
+    const selectedWish = wishes[index];
 
-        document.getElementById("wishNumber").textContent =
-            `TRANSMISSION #${index + 1}`;
+    // Hiển thị lời chào
+    document.getElementById("playerName").textContent =
+        currentName;
 
-        const result = document.getElementById("result");
+    // Hiển thị người gửi
+    document.getElementById("senderMessage").textContent =
+        `Một lời chúc từ ${selectedWish.from} gửi đến ${currentName} ✨`;
 
-        result.style.animation = "none";
-        void result.offsetWidth;
-        result.style.animation = "reveal .8s ease";
-    }
+    // Hiển thị nội dung lời chúc
+    document.getElementById("wish").textContent =
+        selectedWish.text;
+
+    // Mã lời chúc
+    document.getElementById("wishNumber").textContent =
+        `TRANSMISSION #${index + 1}`;
+
+    const result = document.getElementById("result");
+
+    result.style.animation = "none";
+    void result.offsetWidth;
+    result.style.animation = "reveal .8s ease";
+}
 
     // STAR PARTICLES
     const canvas = document.getElementById("stars");
