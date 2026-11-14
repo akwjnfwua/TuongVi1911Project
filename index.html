@@ -167,13 +167,110 @@
     max-width: 600px;
     margin-bottom: 35px;
 }
+
+        
+/* PIXEL FLOATING STARS */
+.pixel-stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.pixel-star {
+    position: absolute;
+    color: #d8caff;
+    font-family: monospace;
+    font-size: 35px;
+    text-shadow: 0 0 10px #a99aff;
+    animation: starFloat 4s ease-in-out infinite,
+               starTwinkle 2.5s ease-in-out infinite;
+}
+
+
+.star-1 {
+    top: 15%;
+    left: 12%;
+    font-size: 32px;
+    animation-delay: 0s, 0.5s;
+}
+
+.star-2 {
+    top: 25%;
+    right: 15%;
+    font-size: 24px;
+    animation-delay: 1s, 0s;
+}
+
+.star-3 {
+    top: 65%;
+    left: 18%;
+    font-size: 28px;
+    animation-delay: 0.5s, 1s;
+}
+
+.star-4 {
+    top: 72%;
+    right: 12%;
+    font-size: 38px;
+    animation-delay: 1.5s, 0.3s;
+}
+
+.star-5 {
+    top: 42%;
+    left: 7%;
+    font-size: 20px;
+    animation-delay: 2s, 0.7s;
+}
+
+.star-6 {
+    top: 48%;
+    right: 8%;
+    font-size: 22px;
+    animation-delay: 0.8s, 1.2s;
+}
+
+
+@keyframes starFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+
+@keyframes starTwinkle {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+
+
+        
     </style>
 </head>
 
 <body>
 
 <canvas id="stars"></canvas>
+    <div class="pixel-stars">
+    <span class="pixel-star star-1">✦</span>
+    <span class="pixel-star star-2">✦</span>
+    <span class="pixel-star star-3">✦</span>
+    <span class="pixel-star star-4">✦</span>
+    <span class="pixel-star star-5">✦</span>
+    <span class="pixel-star star-6">✦</span>
+</div>
 
+
+    
 <main class="container">
 
     <p class="subtitle">19 NOVEMBER · 2026</p>
