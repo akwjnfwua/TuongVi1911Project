@@ -253,6 +253,68 @@
 
 
 
+        /* ===== RANDOM PIXEL STAR EFFECT ===== */
+
+.star-effect-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.magic-star {
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform, opacity;
+    text-shadow: 0 0 8px currentColor;
+}
+
+/* Sao rơi */
+.magic-star.rain {
+    animation: pixelStarRain var(--duration) linear var(--delay) forwards;
+}
+
+@keyframes pixelStarRain {
+    0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Sao bắn tung */
+.magic-star.burst {
+    animation: pixelStarBurst var(--duration) ease-out var(--delay) forwards;
+}
+
+@keyframes pixelStarBurst {
+    0% {
+        transform: translate(0, 0) scale(0.2) rotate(0deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy))
+                   scale(1) rotate(240deg);
+        opacity: 0;
+    }
+}
+
         
     </style>
 </head>
@@ -415,6 +477,89 @@ from: "một người bạn trong lớp"
     }
 ];
     let currentName = "";
+    // ===== RANDOM PIXEL STAR ANIMATION =====
+
+function triggerStarEffect() {
+
+    // Xóa hiệu ứng cũ nếu có
+    document.querySelector(".star-effect-layer")?.remove();
+
+    const layer = document.createElement("div");
+    layer.className = "star-effect-layer";
+    document.body.appendChild(layer);
+
+    // Random một trong hai hiệu ứng
+    const effect = Math.random() < 0.5 ? "rain" : "burst";
+
+    const starSymbols = ["✦", "★"];
+    const starColors = [
+        "#ffffff",
+        "#d8caff",
+        "#aaa9ff",
+        "#fff2a6",
+        "#b9eaff"
+    ];
+
+    const starCount = 28;
+
+    for (let i = 0; i < starCount; i++) {
+
+        const star = document.createElement("span");
+
+        star.className = `magic-star ${effect}`;
+
+        // Random hình dạng và màu sắc
+        star.textContent =
+            starSymbols[Math.floor(Math.random() * starSymbols.length)];
+
+        star.style.color =
+            starColors[Math.floor(Math.random() * starColors.length)];
+
+        // Random kích thước
+        star.style.fontSize = `${Math.random() * 17 + 10}px`;
+
+        // Random thời gian
+        star.style.setProperty(
+            "--duration",
+            `${Math.random() * 1.5 + 2.5}s`
+        );
+
+        star.style.setProperty(
+            "--delay",
+            `${Math.random() * 0.5}s`
+        );
+
+        if (effect === "rain") {
+
+            // Sao rơi từ phía trên
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = "-5vh";
+
+        } else {
+
+            // Sao bắn lên từ phía dưới
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${75 + Math.random() * 20}vh`;
+
+            star.style.setProperty(
+                "--dx",
+                `${(Math.random() - 0.5) * window.innerWidth * 0.9}px`
+            );
+
+            star.style.setProperty(
+                "--dy",
+                `${-(Math.random() * 65 + 15)}vh`
+            );
+        }
+
+        layer.appendChild(star);
+    }
+
+    // Tự dọn hiệu ứng sau 4.5 giây
+    setTimeout(() => {
+        layer.remove();
+    }, 4500);
+}
 
     function startGame() {
         const input = document.getElementById("username");
@@ -460,6 +605,8 @@ from: "một người bạn trong lớp"
     result.style.animation = "none";
     void result.offsetWidth;
     result.style.animation = "reveal .8s ease";
+        
+        triggerStarEffect();
 }
 
     // STAR PARTICLES
