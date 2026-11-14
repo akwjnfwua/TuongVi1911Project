@@ -291,7 +291,7 @@
         <input
             type="text"
             id="username"
-            placeholder="Enter your name..."
+            placeholder="Tên của cậu là gì nhỉ ?"
             maxlength="40"
         >
 
@@ -331,24 +331,56 @@
     // WISH DATABASE
    const wishes = [
     {
-        text: "Chúc cậu luôn mạnh mẽ trước mọi thử thách!",
-        from: "Bạn A"
+        text: "Chúc cậu đoạn đường tương lai bình bình an an, thuận buồm xuôi gió, sớm tìm được người thương, không lo muộn phiền! ",
+        from: "một người bạn đáng tin cậy nhất"
     },
     {
-        text: "Mong mọi ước mơ của cậu đều trở thành hiện thực.",
-        from: "Bạn B"
+        text: "Chúc cậu luôn mạnh mẽ, chân cứng đá mềm không ngại gian khó trên con đường tương lai. Mong cho mọi dự định của cậu đều thành công rực rỡ!",
+        from: "một người bạn ẩn danh"
     },
     {
-        text: "Chúc cậu học tập thật tốt và đạt được mục tiêu!",
-        from: "Bạn C"
+        text: "Chúc cậu một ngày vui vẻ, luôn mang trong mình thật nhiều năng lượng tích cực và sớm đạt được những mục tiêu của bản thân!",
+        from: "một người bạn trong lớp"
     },
     {
-        text: "Mong cậu luôn vui vẻ và gặp nhiều may mắn!",
-        from: "Bạn D"
+        text: "Mong cậu luôn giữ vững được trạng thái tốt nhất của bản thân, A+ đầy nhà, không lo điểm số !",
+        from: "một người bạn của toán tin A3"
+    },
+       {
+        text: "Chúc cậu đông có chăn ấm đệm êm, xuân có người cùng ngắm hoa, hạ có người cùng đón nắng, thu có người đón gió và mây, bốn mùa đều có người thương và may mắn!",
+        from: "một thành viên của lớp toán tin"
+    },
+       {
+        text: "Chúc cậu có một ngày 19/11 thật vui vẻ nha! Mong rằng hôm nay cậu không chỉ nhận được lời chúc này mà còn có thêm thật nhiều lời chúc tốt đẹp, những món quà bất ngờ và niềm vui từ mọi người xung quanh.",
+        from: "một người bạn dễ thương của lớp"
+    },
+       {
+        text: "Đại học là một hành trình còn rất dài với nhiều điều mới mẻ đang chờ đón. Mong cậu sẽ luôn đủ tự tin để bước tiếp trên con đường mình đã chọn và đủ mạnh mẽ để vượt qua những khó khăn phía trước. Chúc cậu có một quãng đời sinh viên thật đáng nhớ, gặp được nhiều người bạn tốt và luôn tìm thấy niềm vui trong những điều mình làm nhé!",
+        from: "một người bạn ẩn danh của toán tin 03"
+    },
+       {
+        text: "Chúc cậu một ngày 19/11 thật vui vẻ, mong rằng ở đại học cậu gặp được thật nhiều bạn mới, có một quãng thật vui vẻ và thi cử điểm cao nhé! Mong rằng chúng mình có thể thân nhau hơn trong quãng thời gian tới (o゜▽゜)o☆",
+        from: "người làm web này"
+    },
+       {
+        text: "Nhân ngày 19/11, tớ mong rằng những ước mơ và dự định mà cậu đang ấp ủ sẽ từng bước trở thành hiện thực. Dù con đường phía trước có đôi lúc không như mong đợi, hy vọng cậu vẫn luôn giữ được niềm tin vào bản thân và can đảm theo đuổi điều mình thực sự yêu thích. Chúc cậu có đủ may mắn, cơ hội và cả bản lĩnh để viết nên câu chuyện của riêng mình! ☆*: .｡. o(≧▽≦)o .｡.:*☆",
+        from: "người viết web này"
+    },
+        {
+        text: "Nhân ngày 19/11, Mong cậu sẽ luôn giữ được sự tự tin, lòng nhiệt huyết và tinh thần lạc quan dù ở bất cứ chặng đường nào. Hy vọng mọi nỗ lực của cậu đều được đền đáp xứng đáng, mọi dự định đều có cơ hội thành hiện thực và ngày nào cũng là một ngày vui vẻ. Chúc cậu có một ngày 19/11 thật vui vẻ và ý nghĩa! ヾ(≧▽≦*)o",
+        from: "một người bạn trong lớp MI1-03"
+    },
+        {
+        text: "Chặng đường học tập chắc chắn sẽ có không ít những kỳ thi và thử thách đang chờ đón. Nhân ngày 19/11, tớ chúc cậu luôn giữ được sự bình tĩnh, tự tin và có sự chuẩn bị thật tốt để vượt qua mọi thử thách. Mong rằng mỗi khi bước vào kì thi, cậu đều có thể phát huy hết khả năng của mình và đạt được kết quả như mong đợi! Chúc cậu đạt A+ giải tít o((>ω< ))o",
+        from: "một người bạn viết web này"
+    },
+        {
+        text: "Nhân ngày 19/11, tớ mong rằng những ước mơ và dự định mà cậu đang ấp ủ sẽ từng bước trở thành hiện thực. Dù con đường phía trước có đôi lúc không như mong đợi, hy vọng cậu vẫn luôn giữ được niềm tin vào bản thân và can đảm theo đuổi điều mình thực sự yêu thích. Chúc cậu có đủ may mắn, cơ hội và cả bản lĩnh để viết nên câu chuyện của riêng mình! ☆*: .｡. o(≧▽≦)o .｡.:*☆",
+        from: "một người bạn của cậu"
     },
     {
-        text: "Chúc cậu code không bug, thi không tạch!",
-        from: "Bạn E"
+        text: "Ngày 19/11 này tớ chúc cậu sẽ có những năm tháng sinh viên thật rực rỡ, được học hỏi, trải nghiệm, gặp gỡ những người bạn tuyệt vời và có thật nhiều cơ hội để trở thành phiên bản mà mình mong muốn! Chúc cậu luôn thuận lợi trên con đường của mình nhé ヾ(≧▽≦*)o",
+        from: "một người bạn trong lớp"
     }
 ];
     let currentName = "";
